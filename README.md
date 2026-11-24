@@ -36,4 +36,4 @@ File access is jailed to your project folder, and shell commands are **off by de
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
