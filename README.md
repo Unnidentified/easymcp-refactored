@@ -10,12 +10,6 @@ Requires [Node.js 18+](https://nodejs.org/). Open Terminal / PowerShell in your 
 npx -y github:Unnidentified/easymcp-refactored
 ```
 
-Or target a specific folder:
-
-```bash
-npx -y github:Unnidentified/easymcp-refactored /path/to/your/project
-```
-
 On Windows, you can also download the repo and double-click `easymcp-refactored.bat`.
 
 ## How it works
@@ -34,6 +28,4 @@ File access is jailed to your project folder, and shell commands are **off by de
 - `--no-tunnel` — local only (no public URL)
 - `--port <n>` — use a custom port
 
-## License
-
-MIT. See [LICENSE](LICENSE).
+License: MIT. [LICENSE](LICENSE).
