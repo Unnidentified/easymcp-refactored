@@ -5,10 +5,10 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 
-const EASY_MCP_HOME = path.join(os.homedir(), '.easy-mcp');
-const CONFIG_FILE = path.join(EASY_MCP_HOME, 'config.json');
-const TOKEN_FILE = path.join(EASY_MCP_HOME, 'token');
-const RECENT_FILE = path.join(EASY_MCP_HOME, 'recent-projects.json');
+const HOME_DIR = path.join(os.homedir(), '.easymcp-refactored');
+const CONFIG_FILE = path.join(HOME_DIR, 'config.json');
+const TOKEN_FILE = path.join(HOME_DIR, 'token');
+const RECENT_FILE = path.join(HOME_DIR, 'recent-projects.json');
 
 let VERSION = '3.0.0';
 try {
@@ -30,7 +30,7 @@ function loadConfig() {
 
 function saveConfig(patch) {
   try {
-    fs.mkdirSync(EASY_MCP_HOME, { recursive: true, mode: 0o700 });
+    fs.mkdirSync(HOME_DIR, { recursive: true, mode: 0o700 });
     fs.writeFileSync(CONFIG_FILE, JSON.stringify({ ...loadConfig(), ...patch }, null, 2) + '\n');
   } catch {}
 }
@@ -45,7 +45,7 @@ function loadOrCreateToken({ tokenArg = '', rotate = false } = {}) {
   }
   const fresh = crypto.randomBytes(24).toString('hex');
   try {
-    fs.mkdirSync(EASY_MCP_HOME, { recursive: true, mode: 0o700 });
+    fs.mkdirSync(HOME_DIR, { recursive: true, mode: 0o700 });
     fs.writeFileSync(TOKEN_FILE, fresh + '\n', { mode: 0o600 });
   } catch {}
   return fresh;
@@ -62,25 +62,25 @@ function loadRecents() {
 
 function saveRecents(list) {
   try {
-    fs.mkdirSync(EASY_MCP_HOME, { recursive: true, mode: 0o700 });
+    fs.mkdirSync(HOME_DIR, { recursive: true, mode: 0o700 });
     fs.writeFileSync(RECENT_FILE, JSON.stringify(list.slice(0, 10), null, 2));
   } catch {}
 }
 
 function createState(argv = process.argv.slice(2), env = process.env) {
-  const port = Number(env.EASY_MCP_PORT || argValue(argv, '--port', '9494'));
-  const token = env.EASY_MCP_TOKEN || argValue(argv, '--token', '') || loadOrCreateToken({
+  const port = Number(env.EASYMCP_PORT || argValue(argv, '--port', '9494'));
+  const token = env.EASYMCP_TOKEN || argValue(argv, '--token', '') || loadOrCreateToken({
     rotate: argv.includes('--rotate-token'),
   });
-  const skipJail = argv.includes('--dangerously-skip-jail') || env.EASY_MCP_SKIP_JAIL === '1';
+  const skipJail = argv.includes('--dangerously-skip-jail') || env.EASYMCP_SKIP_JAIL === '1';
   const positionalProject = argv.find(
     (a) => !a.startsWith('--') && a !== argValue(argv, '--port', '') && a !== argValue(argv, '--token', '')
   );
   const projectRoot = path.resolve(
-    env.EASY_MCP_PROJECT || positionalProject || (skipJail ? path.parse(process.cwd()).root : process.cwd())
+    env.EASYMCP_PROJECT || positionalProject || (skipJail ? path.parse(process.cwd()).root : process.cwd())
   );
 
-  let tunnelMode = env.EASY_MCP_TUNNEL || loadConfig().tunnel || 'cloudflare';
+  let tunnelMode = env.EASYMCP_TUNNEL || loadConfig().tunnel || 'cloudflare';
   if (!['cloudflare', 'funnel', 'none'].includes(tunnelMode)) tunnelMode = 'cloudflare';
 
   const recentProjects = [...new Set([projectRoot, ...loadRecents()])].slice(0, 10);
@@ -90,12 +90,12 @@ function createState(argv = process.argv.slice(2), env = process.env) {
     port,
     token,
     adminSecret: crypto.randomBytes(32).toString('hex'),
-    readOnly: argv.includes('--read-only') || env.EASY_MCP_READ_ONLY === '1',
-    disableShell: !argv.includes('--enable-shell') && env.EASY_MCP_ENABLE_SHELL !== '1',
+    readOnly: argv.includes('--read-only') || env.EASYMCP_READ_ONLY === '1',
+    disableShell: !argv.includes('--enable-shell') && env.EASYMCP_ENABLE_SHELL !== '1',
     skipJail,
     projectRoot,
     recentProjects,
-    publicUrl: (env.EASY_MCP_PUBLIC_URL || '').replace(/\/+$/, ''),
+    publicUrl: (env.EASYMCP_PUBLIC_URL || '').replace(/\/+$/, ''),
     tunnelMode,
     tunnelError: '',
     startedAt: Date.now(),
@@ -133,7 +133,7 @@ function recordCall(state, tool, ok, ms, detail = '') {
 }
 
 module.exports = {
-  EASY_MCP_HOME,
+  HOME_DIR,
   VERSION,
   argValue,
   loadConfig,

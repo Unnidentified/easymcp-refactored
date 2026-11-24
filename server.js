@@ -42,7 +42,7 @@ if (require.main === module) {
   });
 
   server.listen(state.port, '127.0.0.1', () => {
-    console.log(`Easy MCP server on http://127.0.0.1:${state.port} — project: ${state.projectRoot}`);
+    console.log(`easymcp-refactored server on http://127.0.0.1:${state.port} — project: ${state.projectRoot}`);
     tunnel.startTunnel(state.tunnelMode).catch((err) => {
       state.tunnelError = err.message;
     });

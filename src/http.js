@@ -50,7 +50,7 @@ function createHttpServer({ state, registry, mcpHandler, oauth, tunnel, jobManag
     const header = req.headers.authorization || '';
     return header.startsWith('Bearer ')
       ? header.slice(7)
-      : req.headers['x-easy-mcp-token'] || url.searchParams.get('token') || req._pathToken || '';
+      : req.headers['x-easymcp-token'] || url.searchParams.get('token') || req._pathToken || '';
   }
 
   function authorized(req, url) {
@@ -129,7 +129,7 @@ function createHttpServer({ state, registry, mcpHandler, oauth, tunnel, jobManag
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE, HEAD');
       res.setHeader(
         'Access-Control-Allow-Headers',
-        'Content-Type, Authorization, Mcp-Session-Id, x-easy-mcp-token, mcp-protocol-version, mcp-method, mcp-name, *'
+        'Content-Type, Authorization, Mcp-Session-Id, x-easymcp-token, mcp-protocol-version, mcp-method, mcp-name, *'
       );
       res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id, *');
       res.setHeader('Access-Control-Max-Age', '86400');
@@ -143,7 +143,7 @@ function createHttpServer({ state, registry, mcpHandler, oauth, tunnel, jobManag
       const isAdminRoute = url.pathname === '/' || url.pathname === '/dashboard' || url.pathname.startsWith('/api/');
       if (isAdminRoute) {
         if (!isLocalAdminRequest(req, state.port)) return sendJson(res, 404, { error: 'Not found' });
-        if (url.pathname.startsWith('/api/') && !safeEqual(req.headers['x-easy-mcp-admin'] || '', state.adminSecret)) {
+        if (url.pathname.startsWith('/api/') && !safeEqual(req.headers['x-easymcp-admin'] || '', state.adminSecret)) {
           return sendJson(res, 401, { error: 'Unauthorized' });
         }
       } else if (!isPublicPath(url.pathname) && !authorized(req, url)) {
@@ -160,7 +160,7 @@ function createHttpServer({ state, registry, mcpHandler, oauth, tunnel, jobManag
 
       if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/dashboard')) {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
-        return res.end(DASHBOARD_HTML.replace('__EASY_MCP_ADMIN__', state.adminSecret));
+        return res.end(DASHBOARD_HTML.replace('__EASYMCP_ADMIN__', state.adminSecret));
       }
       if (req.method === 'GET' && url.pathname === '/api/dashboard') {
         return sendJson(res, 200, dashboardData());
@@ -300,7 +300,7 @@ function createHttpServer({ state, registry, mcpHandler, oauth, tunnel, jobManag
           const tools = registry.listTools();
           return sendJson(res, 200, {
             status: 'online',
-            service: 'Easy MCP',
+            service: 'easymcp-refactored',
             protocolVersion: '2025-03-26',
             toolsCount: tools.length,
             tools: tools.map((t) => t.name),

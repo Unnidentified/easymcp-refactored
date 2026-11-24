@@ -4,10 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const { spawn, spawnSync } = require('child_process');
-const { EASY_MCP_HOME, saveConfig } = require('./config');
+const { HOME_DIR, saveConfig } = require('./config');
 
 function cloudflaredPath() {
-  return path.join(EASY_MCP_HOME, 'bin', process.platform === 'win32' ? 'cloudflared.exe' : 'cloudflared');
+  return path.join(HOME_DIR, 'bin', process.platform === 'win32' ? 'cloudflared.exe' : 'cloudflared');
 }
 
 function ensureCloudflared() {
@@ -98,7 +98,7 @@ function createTunnelManager(state) {
         const st = spawnSync('tailscale', ['status', '--json'], { encoding: 'utf8', timeout: 15000 });
         dns = JSON.parse(st.stdout || '{}').Self?.DNSName?.replace(/\.$/, '') || '';
       } catch {}
-      dns = dns || process.env.EASY_MCP_FUNNEL_HOST || '';
+      dns = dns || process.env.EASYMCP_FUNNEL_HOST || '';
       if (!dns) {
         state.tunnelError = 'Tailscale not found or not signed in. Install: https://tailscale.com/download';
         state.tunnelMode = 'funnel';

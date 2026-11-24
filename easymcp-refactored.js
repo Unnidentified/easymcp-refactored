@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /*
- * Easy MCP — launcher
+ * easymcp-refactored — launcher
  *
  * Usage:
- *   node easy-mcp.js [project-folder] [--port 9494] [--funnel|--cloudflare|--no-tunnel]
- *                    [--no-open] [--read-only] [--enable-shell] [--token <token>]
- *                    [--rotate-token] [--dangerously-skip-jail]
+ *   node easymcp-refactored.js [project-folder] [--port 9494] [--funnel|--cloudflare|--no-tunnel]
+ *                              [--no-open] [--read-only] [--enable-shell] [--token <token>]
+ *                              [--rotate-token] [--dangerously-skip-jail]
  */
 'use strict';
 
@@ -18,7 +18,7 @@ const { VERSION, argValue, loadOrCreateToken } = require('./src/config');
 const args = process.argv.slice(2);
 let PORT = Number(argValue(args, '--port', '9494'));
 const TOKEN = loadOrCreateToken({
-  tokenArg: argValue(args, '--token', process.env.EASY_MCP_TOKEN || ''),
+  tokenArg: argValue(args, '--token', process.env.EASYMCP_TOKEN || ''),
   rotate: args.includes('--rotate-token'),
 });
 const NO_TUNNEL = args.includes('--no-tunnel');
@@ -55,13 +55,13 @@ function killOldInstances() {
   try {
     if (process.platform === 'win32') {
       const ps = [
-        "Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq 'node.exe' -and $_.CommandLine -like '*easy-mcp*server.js*') -or ($_.Name -eq 'cloudflared.exe' -and $_.CommandLine -like '*.easy-mcp*') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }",
+        "Get-CimInstance Win32_Process | Where-Object { ($_.Name -eq 'node.exe' -and $_.CommandLine -like '*easymcp-refactored*server.js*') -or ($_.Name -eq 'cloudflared.exe' -and $_.CommandLine -like '*.easymcp-refactored*') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }",
         `Get-NetTCPConnection -LocalPort ${PORT} -State Listen -ErrorAction SilentlyContinue | ForEach-Object { $p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; if ($p -and $p.ProcessName -eq 'node') { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } }`,
       ].join('; ');
       spawnSync('powershell.exe', ['-NoProfile', '-Command', ps], { windowsHide: true });
     } else {
-      spawnSync('pkill', ['-f', '^node .*easy-mcp.*server\\.js']);
-      spawnSync('pkill', ['-f', 'cloudflared.*\\.easy-mcp']);
+      spawnSync('pkill', ['-f', '^node .*easymcp-refactored.*server\\.js']);
+      spawnSync('pkill', ['-f', 'cloudflared.*\\.easymcp-refactored']);
     }
   } catch {}
 }
@@ -83,10 +83,10 @@ async function main() {
   const server = spawn(process.execPath, serverArgs, {
     env: {
       ...process.env,
-      EASY_MCP_PORT: String(PORT),
-      EASY_MCP_TOKEN: TOKEN,
-      EASY_MCP_PROJECT: projectDir,
-      ...(TUNNEL_MODE ? { EASY_MCP_TUNNEL: TUNNEL_MODE } : {}),
+      EASYMCP_PORT: String(PORT),
+      EASYMCP_TOKEN: TOKEN,
+      EASYMCP_PROJECT: projectDir,
+      ...(TUNNEL_MODE ? { EASYMCP_TUNNEL: TUNNEL_MODE } : {}),
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -94,7 +94,7 @@ async function main() {
   server.stderr.on('data', (d) => process.stderr.write(d));
 
   const localDashboard = `http://127.0.0.1:${PORT}/`;
-  console.log(`Easy MCP v${VERSION}`);
+  console.log(`easymcp-refactored v${VERSION}`);
   console.log(`Project:   ${projectDir}`);
   if (SKIP_JAIL) {
     console.log('WARNING: --dangerously-skip-jail is ON. Tools can access the entire machine.');

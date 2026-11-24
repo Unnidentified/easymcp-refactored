@@ -18,7 +18,7 @@ function fetchUrl(url, hops = 0) {
 
     const doFetch = () => {
       https
-        .get(url, { headers: { 'User-Agent': 'easy-mcp' }, timeout: 20000 }, (res) => {
+        .get(url, { headers: { 'User-Agent': 'easymcp-refactored' }, timeout: 20000 }, (res) => {
           if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
             res.resume();
             return resolve(fetchUrl(new URL(res.headers.location, url).toString(), hops + 1));

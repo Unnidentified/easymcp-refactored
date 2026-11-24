@@ -3,11 +3,11 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { EASY_MCP_HOME } = require('./config');
+const { HOME_DIR } = require('./config');
 const { sha256hex, safeEqual } = require('./security');
 
-const OAUTH_CLIENTS_FILE = path.join(EASY_MCP_HOME, 'oauth-clients.json');
-const OAUTH_TOKENS_FILE = path.join(EASY_MCP_HOME, 'oauth-tokens.json');
+const OAUTH_CLIENTS_FILE = path.join(HOME_DIR, 'oauth-clients.json');
+const OAUTH_TOKENS_FILE = path.join(HOME_DIR, 'oauth-tokens.json');
 
 function loadOAuthStore(file) {
   try {
@@ -25,7 +25,7 @@ function createOAuthManager(state) {
 
   function saveOAuth() {
     try {
-      fs.mkdirSync(EASY_MCP_HOME, { recursive: true, mode: 0o700 });
+      fs.mkdirSync(HOME_DIR, { recursive: true, mode: 0o700 });
       for (const [file, map] of [
         [OAUTH_CLIENTS_FILE, oauthClients],
         [OAUTH_TOKENS_FILE, oauthTokens],

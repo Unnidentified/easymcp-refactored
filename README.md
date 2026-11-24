@@ -1,4 +1,4 @@
-# Easy MCP
+# easymcp-refactored
 
 Connect a local project folder to Claude, ChatGPT, or Gemini over MCP. One command, zero dependencies, local web dashboard.
 
@@ -16,7 +16,7 @@ Or target a specific folder:
 npx -y github:Unnidentified/easymcp-refactored /path/to/your/project
 ```
 
-On Windows, you can also download the repo and double-click `easy-mcp.bat`.
+On Windows, you can also download the repo and double-click `easymcp-refactored.bat`.
 
 ## How it works
 
