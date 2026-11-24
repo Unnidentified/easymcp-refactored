@@ -1,13 +1,13 @@
 {
-  "name": "easy-mcp",
+  "name": "easymcp-refactored",
   "version": "3.0.0",
   "description": "Zero-dependency local MCP server with folder jail, OAuth 2.1, tunnel support, and a clean web control plane.",
-  "main": "easy-mcp.js",
+  "main": "easymcp-refactored.js",
   "bin": {
-    "easy-mcp": "./easy-mcp.js"
+    "easymcp-refactored": "./easymcp-refactored.js"
   },
   "scripts": {
-    "start": "node easy-mcp.js",
+    "start": "node easymcp-refactored.js",
     "test": "node --test test/run.js"
   },
   "engines": {

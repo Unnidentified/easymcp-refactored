@@ -42,7 +42,7 @@ function request(port, method, urlPath, { headers = {}, body = null } = {}) {
   });
 }
 
-describe('Easy MCP v3', () => {
+describe('easymcp-refactored v3', () => {
   let tmpDir;
   let outsideDir;
   let app;
@@ -58,10 +58,10 @@ describe('Easy MCP v3', () => {
     fs.writeFileSync(path.join(tmpDir, 'sub', 'app.js'), 'const x = 42;\nconsole.log(x);\n');
 
     app = createApp([], {
-      EASY_MCP_PORT: '0',
-      EASY_MCP_TOKEN: token,
-      EASY_MCP_PROJECT: tmpDir,
-      EASY_MCP_TUNNEL: 'none',
+      EASYMCP_PORT: '0',
+      EASYMCP_TOKEN: token,
+      EASYMCP_PROJECT: tmpDir,
+      EASYMCP_TUNNEL: 'none',
     });
 
     await new Promise((resolve) => {
@@ -92,7 +92,7 @@ describe('Easy MCP v3', () => {
     });
     assert.equal(init.status, 200);
     assert.ok(init.headers['mcp-session-id']);
-    assert.equal(init.json.result.serverInfo.name, 'Easy MCP');
+    assert.equal(init.json.result.serverInfo.name, 'easymcp-refactored');
 
     const tools = await request(port, 'POST', '/mcp', {
       headers: { Authorization: `Bearer ${token}` },
@@ -183,11 +183,11 @@ describe('Easy MCP v3', () => {
   it('blocks admin routes when tunnel proxy headers are present', async () => {
     const ok = await request(port, 'GET', '/');
     assert.equal(ok.status, 200);
-    assert.match(ok.text, /Easy MCP/);
+    assert.match(ok.text, /easymcp-refactored/);
     assert.doesNotMatch(ok.text, /slotPromo|Cinzel/);
 
     const blocked = await request(port, 'GET', '/api/dashboard', {
-      headers: { 'cf-ray': '12345', 'x-easy-mcp-admin': app.state.adminSecret },
+      headers: { 'cf-ray': '12345', 'x-easymcp-admin': app.state.adminSecret },
     });
     assert.equal(blocked.status, 404);
   });

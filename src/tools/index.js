@@ -35,14 +35,14 @@ function createToolRegistry(state, jobManager) {
     const tool = allTools.find((t) => t.name === name);
     if (!tool) throw new Error(`Unknown tool: ${name}`);
     if (name === 'set_project' && !state.skipJail) {
-      throw new Error('set_project is disabled while the folder jail is on; switch projects in the Easy MCP dashboard');
+      throw new Error('set_project is disabled while the folder jail is on; switch projects in the easymcp-refactored dashboard');
     }
     if (state.readOnly && tool.write) {
       throw new Error('Server is in read-only mode');
     }
     if (state.disableShell && tool.shell) {
       throw new Error(
-        'Shell is off (the default). If you need to run tests or a build, ask the user to enable Shell in the Easy MCP dashboard.'
+        'Shell is off (the default). If you need to run tests or a build, ask the user to enable Shell in the easymcp-refactored dashboard.'
       );
     }
 

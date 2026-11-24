@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Easy MCP</title>
+<title>easymcp-refactored</title>
 <style>
   :root {
     color-scheme: dark light;
@@ -175,7 +175,7 @@
 <div class="wrap">
   <header>
     <div class="brand">
-      <h1>Easy MCP</h1>
+      <h1>easymcp-refactored</h1>
       <span class="badge" id="verBadge">v--</span>
       <span class="badge ok" id="statusBadge">ONLINE</span>
     </div>
@@ -291,7 +291,7 @@
 </div>
 
 <script>
-const ADMIN = '__EASY_MCP_ADMIN__';
+const ADMIN = '__EASYMCP_ADMIN__';
 let currentData = null;
 let toolsMeta = [];
 
@@ -300,7 +300,7 @@ function esc(s) {
 }
 
 async function api(url, opts = {}) {
-  const headers = { ...(opts.headers || {}), 'x-easy-mcp-admin': ADMIN };
+  const headers = { ...(opts.headers || {}), 'x-easymcp-admin': ADMIN };
   const res = await fetch(url, { ...opts, headers });
   return res.json();
 }

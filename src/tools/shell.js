@@ -7,7 +7,7 @@ function createShellTools(state, jobManager) {
     {
       name: 'execute_command',
       description:
-        'Run a shell command inside the project folder. Returns exit code and output. Shell is OFF by default — if disabled, ask the user to enable Shell in the Easy MCP dashboard.',
+        'Run a shell command inside the project folder. Returns exit code and output. Shell is OFF by default — if disabled, ask the user to enable Shell in the easymcp-refactored dashboard.',
       inputSchema: {
         type: 'object',
         properties: {

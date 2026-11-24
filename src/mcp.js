@@ -49,7 +49,7 @@ function createMcpHandler(state, registry) {
     return files.map((abs) => {
       const rel = relOf(state, abs);
       return {
-        uri: `easymcp://project/${encodeURIComponent(rel)}`,
+        uri: `easymcp-refactored://project/${encodeURIComponent(rel)}`,
         name: rel,
         mimeType: 'text/plain',
       };
@@ -57,7 +57,7 @@ function createMcpHandler(state, registry) {
   }
 
   function readResource(uri) {
-    const prefix = 'easymcp://project/';
+    const prefix = 'easymcp-refactored://project/';
     if (!String(uri || '').startsWith(prefix)) {
       throw new Error(`Unsupported resource URI: ${uri}`);
     }
@@ -83,7 +83,7 @@ function createMcpHandler(state, registry) {
             resources: {},
             prompts: {},
           },
-          serverInfo: { name: 'Easy MCP', version: state.version },
+          serverInfo: { name: 'easymcp-refactored', version: state.version },
         });
       case 'notifications/initialized':
         return null;
