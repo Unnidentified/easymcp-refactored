@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Easy MCP</title>
+<style>
+  :root {
+    color-scheme: dark light;
+    --bg: #0c0d10;
+    --surface: #14161b;
+    --surface-2: #1b1e25;
+    --border: #262a34;
+    --border-hover: #3a404f;
+    --text: #eceef2;
+    --muted: #8b93a7;
+    --accent: #3b82f6;
+    --accent-soft: rgba(59, 130, 246, 0.14);
+    --ok: #22c55e;
+    --ok-soft: rgba(34, 197, 94, 0.14);
+    --err: #ef4444;
+    --err-soft: rgba(239, 68, 68, 0.14);
+    --warn: #f59e0b;
+    --warn-soft: rgba(245, 158, 11, 0.14);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --surface-2: #f9fafb;
+      --border: #e2e5ec;
+      --border-hover: #c9cfd9;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent-soft: rgba(59, 130, 246, 0.1);
+      --ok-soft: rgba(34, 197, 94, 0.1);
+      --err-soft: rgba(239, 68, 68, 0.1);
+      --warn-soft: rgba(245, 158, 11, 0.1);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 24px 16px 48px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  header {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+    font-family: var(--mono);
+  }
+  .badge.ok { background: var(--ok-soft); border-color: transparent; color: var(--ok); }
+  .badge.warn { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
+  .badge.err { background: var(--err-soft); border-color: transparent; color: var(--err); }
+  .meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+  .alert {
+    display: none; padding: 12px 14px; border-radius: var(--radius);
+    background: var(--err-soft); border: 1px solid var(--err); color: var(--err);
+    font-size: 13px; font-weight: 500;
+  }
+  .alert.show { display: block; }
+
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .col-7 { grid-column: span 7; }
+  .col-5 { grid-column: span 5; }
+  .col-6 { grid-column: span 6; }
+  .col-12 { grid-column: span 12; }
+  @media (max-width: 820px) {
+    .col-7, .col-5, .col-6 { grid-column: span 12; }
+  }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  input[type="text"], select, textarea {
+    width: 100%; background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 7px; padding: 8px 10px;
+    font-family: var(--mono); font-size: 12.5px; outline: none;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .btn {
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 7px; padding: 8px 12px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: border-color 0.15s, background 0.15s;
+  }
+  .btn:hover { border-color: var(--border-hover); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { opacity: 0.92; }
+  .btn.danger { background: var(--err-soft); border-color: transparent; color: var(--err); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; padding: 2px; gap: 2px; }
+  .seg button {
+    border: none; background: transparent; color: var(--muted); padding: 5px 10px;
+    font-size: 12px; font-weight: 600; border-radius: 5px; cursor: pointer;
+  }
+  .seg button.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-family: var(--mono); font-size: 11.5px; padding: 4px 8px; border-radius: 6px;
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+    cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .chip:hover, .chip.active { border-color: var(--accent); color: var(--text); }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .toggle-label { font-weight: 600; font-size: 13px; }
+  .toggle-desc { font-size: 12px; color: var(--muted); }
+
+  .switch { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0; background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 999px; cursor: pointer; transition: 0.15s;
+  }
+  .slider::before {
+    content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px;
+    background: var(--muted); border-radius: 50%; transition: 0.15s;
+  }
+  input:checked + .slider { background: var(--accent); border-color: var(--accent); }
+  input:checked + .slider::before { transform: translateX(16px); background: #fff; }
+  input.danger-toggle:checked + .slider { background: var(--err); border-color: var(--err); }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  .stat-val { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+  .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+
+  .list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .item {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 8px 10px; border-radius: 7px; background: var(--surface-2); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 12px;
+  }
+  .item-main { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item-sub { color: var(--muted); font-size: 11px; flex-shrink: 0; }
+
+  pre {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 10px; font-family: var(--mono); font-size: 12px; overflow: auto; max-height: 220px;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .msg { font-size: 12px; min-height: 16px; color: var(--muted); }
+  .msg.ok { color: var(--ok); }
+  .msg.err { color: var(--err); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Easy MCP</h1>
+      <span class="badge" id="verBadge">v--</span>
+      <span class="badge ok" id="statusBadge">ONLINE</span>
+    </div>
+    <div class="meta">
+      <span id="stUptime">uptime: --</span>
+      <span id="stLocalUrl">127.0.0.1:--</span>
+    </div>
+  </header>
+
+  <div class="alert" id="jailWarn">
+    Folder jail is disabled (--dangerously-skip-jail). Tools can access the entire filesystem.
+  </div>
+
+  <div class="grid">
+    <section class="card col-7">
+      <div class="card-head">
+        <span class="card-title">MCP Endpoint &amp; Tunnel</span>
+        <div class="seg">
+          <button id="tunCloudflare" onclick="setTunnel('cloudflare')">Cloudflare</button>
+          <button id="tunFunnel" onclick="setTunnel('funnel')">Tailscale</button>
+          <button id="tunNone" onclick="setTunnel('none')">Local only</button>
+        </div>
+      </div>
+      <div class="row">
+        <input type="text" id="mcpUrl" readonly value="(establishing tunnel...)">
+        <button class="btn primary" onclick="copyEl('mcpUrl', this)">Copy URL</button>
+      </div>
+      <div class="msg err" id="tunError"></div>
+      <div class="card-head" style="margin-top:4px;">
+        <span class="card-title">Project Folder</span>
+      </div>
+      <div class="row">
+        <input type="text" id="projectPath" placeholder="/path/to/project" onkeydown="if(event.key==='Enter') setProject()">
+        <button class="btn" id="pickBtn" onclick="pickFolder(this)">Browse</button>
+        <button class="btn primary" onclick="setProject()">Set</button>
+      </div>
+      <div class="chips" id="recent"></div>
+      <div class="msg" id="msg"></div>
+    </section>
+
+    <section class="card col-5">
+      <div class="card-head">
+        <span class="card-title">Security &amp; Telemetry</span>
+      </div>
+      <div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Read-Only Mode</div>
+            <div class="toggle-desc">Block all file writes, edits, moves, and deletes</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="togReadOnly" onchange="saveSetting('readOnly', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Enable Shell</div>
+            <div class="toggle-desc">Allow execute_command and start_job</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="togEnableShell" onchange="saveSetting('disableShell', !this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Disable Folder Jail</div>
+            <div class="toggle-desc">Allow access outside the project folder</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" class="danger-toggle" id="togSkipJail" onchange="toggleJail(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-val" id="stCalls">0</div><div class="stat-lbl">Calls</div></div>
+        <div class="stat"><div class="stat-val" id="stErrors">0</div><div class="stat-lbl">Errors</div></div>
+        <div class="stat"><div class="stat-val" id="stSessions">0</div><div class="stat-lbl">Sessions</div></div>
+        <div class="stat"><div class="stat-val" id="stTools">0</div><div class="stat-lbl">Tools</div></div>
+      </div>
+    </section>
+
+    <section class="card col-6">
+      <div class="card-head">
+        <span class="card-title">Recent Tool Calls</span>
+      </div>
+      <div class="list" id="callsList">
+        <div class="item"><span class="item-main" style="color:var(--muted)">No tool calls yet.</span></div>
+      </div>
+    </section>
+
+    <section class="card col-6">
+      <div class="card-head">
+        <span class="card-title">Tool Playground</span>
+      </div>
+      <div class="row">
+        <select id="toolSelect" onchange="onToolSelect()"></select>
+        <button class="btn primary" onclick="runSelectedTool()">Run</button>
+      </div>
+      <textarea id="toolArgs" placeholder='{"path": "."}'></textarea>
+      <pre id="toolOutput">(select a tool and click Run to test locally)</pre>
+    </section>
+
+    <section class="card col-12" id="jobsCard" style="display:none;">
+      <div class="card-head">
+        <span class="card-title">Background Jobs</span>
+      </div>
+      <div class="list" id="jobsList"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const ADMIN = '__EASY_MCP_ADMIN__';
+let currentData = null;
+let toolsMeta = [];
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function api(url, opts = {}) {
+  const headers = { ...(opts.headers || {}), 'x-easy-mcp-admin': ADMIN };
+  const res = await fetch(url, { ...opts, headers });
+  return res.json();
+}
+
+function setMsg(text, kind = '') {
+  const el = document.getElementById('msg');
+  el.textContent = text || '';
+  el.className = 'msg' + (kind ? ' ' + kind : '');
+}
+
+function copyEl(id, btn) {
+  const el = document.getElementById(id);
+  if (!el || !el.value || el.value.startsWith('(')) return;
+  navigator.clipboard.writeText(el.value);
+  const old = btn.textContent;
+  btn.textContent = 'Copied';
+  setTimeout(() => { btn.textContent = old; }, 1200);
+}
+
+async function setTunnel(mode) {
+  document.getElementById('tunError').textContent = '';
+  const r = await api('/api/set-tunnel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode }),
+  });
+  if (r.error) document.getElementById('tunError').textContent = r.error;
+  tick();
+}
+
+async function setProject(override) {
+  const p = override !== undefined ? override : document.getElementById('projectPath').value.trim();
+  if (!p) return;
+  const r = await api('/api/set-project', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: p }),
+  });
+  if (r.success) {
+    setMsg('Project updated: ' + r.project, 'ok');
+    tick();
+  } else {
+    setMsg(r.error || 'Failed to set project', 'err');
+  }
+}
+
+async function pickFolder(btn) {
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Opening...';
+  try {
+    const r = await api('/api/pick-folder', { method: 'POST' });
+    if (r.success) {
+      setMsg('Project updated: ' + r.project, 'ok');
+      tick();
+    } else if (r.status === 'error') {
+      setMsg(r.error || 'Folder picker failed', 'err');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = old;
+  }
+}
+
+async function saveSetting(key, value) {
+  await api('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ [key]: value }),
+  });
+  tick();
+}
+
+async function toggleJail(checked) {
+  if (checked && !confirm('Disable the folder jail? Tools will be able to read, write, and run commands anywhere on this machine.')) {
+    document.getElementById('togSkipJail').checked = false;
+    return;
+  }
+  await saveSetting('skipJail', checked);
+}
+
+async function stopJob(id) {
+  await api('/api/stop-job', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  tick();
+}
+
+function fmtUptime(s) {
+  if (s < 60) return s + 's';
+  if (s < 3600) return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+  return Math.floor(s / 3600) + 'h ' + Math.floor((s % 3600) / 60) + 'm';
+}
+
+function renderToolsSelect(tools) {
+  const sel = document.getElementById('toolSelect');
+  const prev = sel.value;
+  toolsMeta = tools;
+  if (sel.options.length === tools.length) return;
+  sel.innerHTML = tools.map((t) => `<option value="${esc(t.name)}">${esc(t.name)}</option>`).join('');
+  if (prev && tools.some((t) => t.name === prev)) sel.value = prev;
+  onToolSelect();
+}
+
+function onToolSelect() {
+  const name = document.getElementById('toolSelect').value;
+  const meta = toolsMeta.find((t) => t.name === name);
+  if (!meta) return;
+  const sample = {};
+  const props = meta.inputSchema?.properties || {};
+  for (const [k, v] of Object.entries(props)) {
+    if ((meta.inputSchema?.required || []).includes(k)) {
+      sample[k] = v.type === 'integer' || v.type === 'number' ? 10 : v.type === 'boolean' ? false : v.type === 'array' ? [] : '.';
+    }
+  }
+  document.getElementById('toolArgs').value = JSON.stringify(sample, null, 2);
+}
+
+async function runSelectedTool() {
+  const name = document.getElementById('toolSelect').value;
+  const out = document.getElementById('toolOutput');
+  let args = {};
+  try {
+    args = JSON.parse(document.getElementById('toolArgs').value || '{}');
+  } catch (e) {
+    out.textContent = 'Invalid JSON arguments: ' + e.message;
+    return;
+  }
+  out.textContent = 'Running...';
+  const r = await api('/api/call', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, arguments: args }),
+  });
+  out.textContent = r.success ? r.result : 'Error: ' + r.error;
+  tick();
+}
+
+async function tick() {
+  try {
+    const d = await api('/api/dashboard');
+    currentData = d;
+    document.getElementById('verBadge').textContent = 'v' + d.version;
+    document.getElementById('stUptime').textContent = 'uptime: ' + fmtUptime(d.uptimeSec);
+    document.getElementById('stLocalUrl').textContent = d.localMcpUrl || '';
+    document.getElementById('jailWarn').classList.toggle('show', Boolean(d.skipJail));
+
+    const mcpInput = document.getElementById('mcpUrl');
+    if (d.tunnelMode === 'none') {
+      mcpInput.value = d.localMcpUrl;
+    } else {
+      mcpInput.value = d.mcpUrl || '(establishing tunnel...)';
+    }
+
+    document.getElementById('tunCloudflare').classList.toggle('active', d.tunnelMode === 'cloudflare');
+    document.getElementById('tunFunnel').classList.toggle('active', d.tunnelMode === 'funnel');
+    document.getElementById('tunNone').classList.toggle('active', d.tunnelMode === 'none');
+    document.getElementById('tunError').textContent = d.tunnelError || '';
+
+    const projEl = document.getElementById('projectPath');
+    if (document.activeElement !== projEl) projEl.value = d.project;
+
+    document.getElementById('recent').innerHTML = (d.recentProjects || [])
+      .map((p) => `<button class="chip ${p === d.project ? 'active' : ''}" onclick="setProject(${esc(JSON.stringify(p))})" title="${esc(p)}">${esc(p)}</button>`)
+      .join('');
+
+    document.getElementById('togReadOnly').checked = Boolean(d.readOnly);
+    document.getElementById('togEnableShell').checked = !d.disableShell;
+    document.getElementById('togSkipJail').checked = Boolean(d.skipJail);
+
+    document.getElementById('stCalls').textContent = d.totalCalls;
+    document.getElementById('stErrors').textContent = d.totalErrors;
+    document.getElementById('stSessions').textContent = d.sseSessions + d.mcpSessions;
+    document.getElementById('stTools').textContent = d.toolsCount;
+
+    if (Array.isArray(d.tools)) renderToolsSelect(d.tools);
+
+    const callsEl = document.getElementById('callsList');
+    if (d.recentCalls && d.recentCalls.length) {
+      callsEl.innerHTML = d.recentCalls.slice(0, 30).map((c) => `
+        <div class="item">
+          <span class="item-main">
+            <span class="badge ${c.ok ? 'ok' : 'err'}">${c.ok ? 'OK' : 'ERR'}</span>
+            <strong>${esc(c.tool)}</strong>
+            <span style="color:var(--muted)">${esc(c.detail || '')}</span>
+          </span>
+          <span class="item-sub">${c.ms}ms</span>
+        </div>
+      `).join('');
+    }
+
+    const jobsCard = document.getElementById('jobsCard');
+    const jobsList = document.getElementById('jobsList');
+    if (d.jobs && d.jobs.length) {
+      jobsCard.style.display = 'flex';
+      jobsList.innerHTML = d.jobs.map((j) => `
+        <div class="item">
+          <span class="item-main">
+            <span class="badge ${j.status === 'running' ? 'ok' : 'warn'}">${esc(j.status)}</span>
+            <strong>${esc(j.id)}</strong> ${esc(j.command)}
+          </span>
+          <span class="row">
+            ${j.status === 'running' ? `<button class="btn danger" onclick="stopJob('${esc(j.id)}')">Stop</button>` : ''}
+          </span>
+        </div>
+      `).join('');
+    } else {
+      jobsCard.style.display = 'none';
+    }
+  } catch {}
+}
+
+tick();
+setInterval(tick, 2000);
+</script>
+</body>
+</html>
