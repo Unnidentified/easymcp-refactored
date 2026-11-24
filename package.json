@@ -3,6 +3,9 @@
   "version": "3.0.0",
   "description": "Zero-dependency local MCP server with folder jail, OAuth 2.1, tunnel support, and a clean web control plane.",
   "main": "easy-mcp.js",
+  "bin": {
+    "easy-mcp": "./easy-mcp.js"
+  },
   "scripts": {
     "start": "node easy-mcp.js",
     "test": "node --test test/run.js"
